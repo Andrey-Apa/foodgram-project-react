@@ -1,1 +1,3 @@
-# praktikum_new_diplom
+# Foodgram
+
+Будет заполнено на следующем этапе
