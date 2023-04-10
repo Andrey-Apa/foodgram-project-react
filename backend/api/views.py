@@ -41,7 +41,7 @@ class CustomUserViewSet(UserViewSet):
     def get_serializer_class(self):
         if self.action == 'create':
             return CustomUserCreateSerializer
-        elif self.action == 'set_password':
+        if self.action == 'set_password':
             return CustomPasswordSerializer
         return CustomUserSerializer
 
@@ -71,7 +71,7 @@ class CustomUserViewSet(UserViewSet):
                 context={'recipes_limit': request.GET.get('recipes_limit')})
             return Response(serializer_show.data,
                             status=status.HTTP_201_CREATED)
-        elif request.method == 'DELETE':
+        if request.method == 'DELETE':
             subscription = Subscriptions.objects.filter(
                 user=user,
                 author=author
