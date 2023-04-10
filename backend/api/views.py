@@ -36,6 +36,7 @@ class CustomUserViewSet(UserViewSet):
     """Кастомый вьюсет для пользователей,
     также используется для создания и удаления подписок."""
     pagination_class = PageLimitPagination
+    add_serializer = UserSubscribeSerializer
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -46,7 +47,7 @@ class CustomUserViewSet(UserViewSet):
 
     def get_permissions(self):
         if self.action == 'retrieve':
-            self.permission_classes = [IsAuthenticated]
+            self.permission_classes = (IsAuthenticated,)
         return super().get_permissions()
 
     @action(
@@ -65,9 +66,11 @@ class CustomUserViewSet(UserViewSet):
         if request.method == 'POST':
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            return Response(
-                UserSubscribeSerializer(author).data,
-                status=status.HTTP_201_CREATED)
+            serializer_show = UserSubscribeSerializer(
+                author,
+                context={'recipes_limit': request.GET.get('recipes_limit')})
+            return Response(serializer_show.data,
+                            status=status.HTTP_201_CREATED)
         elif request.method == 'DELETE':
             subscription = Subscriptions.objects.filter(
                 user=user,

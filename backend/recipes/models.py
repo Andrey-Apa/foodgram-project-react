@@ -1,17 +1,19 @@
 import textwrap
-from django.db import models
-from django.core.validators import MinValueValidator
-from django.contrib.auth import get_user_model
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 
 from core.models import CoreModel
-
+from core.validators import hex_color_validator
 
 User = get_user_model()
 
 CLS_NAME_LEN = settings.CLS_NAME_LEN
+MAX_COOKING_TIME = settings.MAX_COOKING_TIME
 MIN_COOKING_TIME = settings.MIN_COOKING_TIME
+MAX_AMOUNT = settings.MAX_AMOUNT
 MIN_AMOUNT = settings.MIN_AMOUNT
 
 
@@ -25,13 +27,11 @@ class Tag(models.Model):
     color = models.CharField(
         'Цвет в HEX',
         max_length=7,
-        null=True,
     )
     slug = models.SlugField(
         'Уникальный слаг',
         max_length=200,
         unique=True,
-        null=True,
     )
 
     class Meta:
@@ -40,6 +40,10 @@ class Tag(models.Model):
 
     def __str__(self) -> str:
         return self.name[:CLS_NAME_LEN]
+
+    def clean(self):
+        self.color = hex_color_validator(self.color)
+        return super().clean()
 
 
 class Ingredient(models.Model):
@@ -73,8 +77,7 @@ class Recipe(models.Model):
     )
     author = models.ForeignKey(
         User,
-        on_delete=models.SET_NULL,
-        null=True,
+        on_delete=models.CASCADE,
         related_name='recipes',
         verbose_name='Автор'
     )
@@ -95,16 +98,21 @@ class Recipe(models.Model):
     )
     cooking_time = models.PositiveSmallIntegerField(
         'Время приготовления',
-        validators=(MinValueValidator(
+        validators=(
+            MinValueValidator(
                 MIN_COOKING_TIME,
                 'Время приготовления не может быть меньше минуты.'),
+            MaxValueValidator(
+                MAX_COOKING_TIME,
+                ('Вы указали слишком длительное время приготовления '
+                 '(максимум 10080 минут).'),
+            ),
         )
     )
     pub_date = models.DateTimeField(
         'Дата публикации рецепта',
         auto_now_add=True,
         db_index=True,
-        editable=False,
     )
 
     class Meta:
@@ -167,9 +175,15 @@ class IngredientRecipe(models.Model):
     )
     amount = models.PositiveSmallIntegerField(
         'Количество',
-        validators=(MinValueValidator(
+        validators=(
+            MinValueValidator(
                 MIN_AMOUNT,
                 'Количество ингредиента не должно быть меньше 1.'),
+            MaxValueValidator(
+                MAX_AMOUNT,
+                ('Вы указали слишком большое количество ингредиента '
+                 '(максимальное значение 32767).'),
+            ),
         )
     )
 

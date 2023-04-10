@@ -3,7 +3,6 @@ from djoser.serializers import (PasswordSerializer, UserCreateSerializer,
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
 
 from recipes.models import (Ingredient, IngredientRecipe, Favorite,
@@ -31,9 +30,8 @@ class CustomUserSerializer(UserSerializer):
         на просматриваемого пользователя.
         """
         user = self.context['request'].user
-        if user.is_anonymous:
-            return False
-        return obj.subscriber.filter(user_id=user.id).exists()
+        return (user.is_authenticated
+                and user.subscriber.filter(author=obj).exists())
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -83,12 +81,11 @@ class UserSubscribeSerializer(CustomUserSerializer):
     def get_recipes(self, obj):
         """Определение поля recipes, передача параметра recipes_limit."""
         request = self.context.get('request')
-        try:
+        if request is not None:
             limit = request.GET.get('recipes_limit')
-        except AttributeError:
-            limit = False
-        author = get_object_or_404(User, username=obj.username)
-        recipes = Recipe.objects.filter(author=author)
+        else:
+            limit = self.context.get('recipes_limit')
+        recipes = obj.recipes.all()
         if limit:
             recipes = recipes[:int(limit)]
         return ShortRecipeSerializer(recipes, many=True).data
@@ -113,7 +110,7 @@ class SubscribeSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        if data['user'] == data['author']:
+        if data.get('user') == data.get('author'):
             raise serializers.ValidationError(
                 'Нельзя подписаться на самого себя!')
         return data
@@ -198,20 +195,15 @@ class GetRecipeSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
-        user = request.user
-        return Favorite.objects.filter(
-            favorite_recipe=obj,
-            user=user
-        ).exists()
+        return (((request is not None) or request.user.is_authenticated)
+                and Favorite.objects.filter(favorite_recipe=obj,
+                                            user=request.user).exists())
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
-        user = request.user
-        return ShoppingCart.objects.filter(recipe=obj, user=user).exists()
+        return (((request is not None) or request.user.is_authenticated)
+                and ShoppingCart.objects.filter(recipe=obj,
+                                                user=request.user).exists())
 
 
 class CreateRecipeSerializer(GetRecipeSerializer):

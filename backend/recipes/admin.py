@@ -50,7 +50,7 @@ class IngredientAdmin(ModelAdmin):
 
 @register(Recipe)
 class RecipeAdmin(ModelAdmin):
-    def favorite_recipes_count(self, obj: Recipe) -> int:
+    def favorite_recipes_count(self, obj):
         return obj.favorite_recipes.count()
 
     favorite_recipes_count.short_description = 'Сколько в избранном'
