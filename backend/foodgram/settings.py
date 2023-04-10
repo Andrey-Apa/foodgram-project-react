@@ -137,7 +137,6 @@ DJOSER = {
     },
 }
 
-#CONSTANTS
 DATE_TIME_FORMAT: str = '%d/%m/%Y %H:%M'
 
 EMPTY_VALUE_DISPLAY: str = '-Пусто-'
