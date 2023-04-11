@@ -23,11 +23,9 @@
 Документация API доступна по адресу: https://foodgram-andreyapa.sytes.net/api/docs/.
 
 ## Запуск проекта локально
-1. Склонируйте репозиторий и прейдите в директорию backend:
+1. Склонируйте репозиторий:
 ```bash
 git clone git@github.com:Andrey-Apa/foodgram-project-react.git
-
-cd backend
 ```
 2. Cоздать и активировать виртуальное окружение:
 -для Windows
@@ -44,35 +42,35 @@ source env/bin/activate
 -для Windows
 ```bash
 python -m pip install --upgrade pip
+cd backend
 pip install -r requirements.txt
 ```
 -для Linux, MacOs:
 ```bash
 python3 -m pip install --upgrade pip
+cd backend
 pip install -r requirements.txt
 ```
 4. Выполнить миграции:
-Выполнить миграции из директории foodgram:
+Выполнить миграции:
 -для Windows:
 ```bash
-cd foodgram/
 python manage.py migrate
 ```
 -для Linux, MacOs:
 ```bash
-cd foodgram/
 python3 manage.py migrate
 ```
 5. Загрузите базу данными ингридиентов:
 -для Windows:
 ```bash
 cd ../data
-python manage.py loaddata ingredients.json
+python manage.py import_data
 ```
 -для Linux, MacOs:
 ```bash
 cd ../data
-python3 manage.py loaddata ingredients.json
+python3 manage.py import_data
 ```
 6. Запустить проект:
 -для Windows
@@ -117,6 +115,8 @@ SECRET_KEY, ALLOWED_HOSTS
 - установить docker-compose в соответствии с официальной документацией;
 https://docs.docker.com/compose/install/
 
+- cкопировать файлы docker-compose.yaml и nginx.conf из проекта на сервер в home/<ваш_username>/foodgram/docker-compose.yaml и home/<ваш_username>/foodgram/nginx.conf соответственно.
+
 4. На GitHUB выполнить любой commit, для запуска action workflow;
 
 5. На вашем сервере , загрузить данные, собрать статику:
@@ -126,7 +126,7 @@ sudo docker-compose exec backend python manage.py migrate
 ```
 - при необходимости загрузите базу данными:
 ```bash
-sudo docker-compose exec backend python manage.py loaddata ingredients.json
+sudo docker-compose exec backend python manage.py loaddata dump.json
 ```
 - создайте суперюзера:
 ```bash
