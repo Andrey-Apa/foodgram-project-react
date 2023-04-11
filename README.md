@@ -122,19 +122,19 @@ https://docs.docker.com/compose/install/
 5. На вашем сервере , загрузить данные, собрать статику:
 - выполнить миграции:
 ```bash
-sudo docker-compose exec web python manage.py migrate
+sudo docker-compose exec backend python manage.py migrate
 ```
 - при необходимости загрузите базу данными:
 ```bash
-sudo docker-compose exec web python manage.py loaddata ingredients.json
+sudo docker-compose exec backend python manage.py loaddata ingredients.json
 ```
 - создайте суперюзера:
 ```bash
-sudo docker-compose exec web python manage.py createsuperuser
+sudo docker-compose exec backend python manage.py createsuperuser
 ```
 - соберите статику:
 ```bash
-sudo docker-compose exec web python manage.py collectstatic --no-input
+sudo docker-compose exec backend python manage.py collectstatic --no-input
 ```
 
 6. Ваш проект доступен по адресу вашего сервера:
