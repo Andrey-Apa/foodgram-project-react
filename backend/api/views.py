@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import F, Sum
 from djoser.views import UserViewSet
-from rest_framework import status, permissions
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -17,7 +17,7 @@ from users.models import Subscriptions
 
 from .filters import IngredientSearchFilter, RecipeFilter
 from .paginators import PageLimitPagination
-from .permissions import IsAdminOrReadOnly
+from .permissions import IsAdminOrReadOnly, AuthorAdminOrReadOnly
 from .mixins import CreateDestroyViewSet, ListSubscriptionViewSet
 
 from .serializers import (CustomPasswordSerializer, CustomUserCreateSerializer,
@@ -124,7 +124,7 @@ class RecipesViewSet(ModelViewSet):
     присутсвию рецептов в избранном и списке покупок.
     """
     queryset = Recipe.objects.all()
-    permissions = (permissions.AllowAny)
+    permissions = (AuthorAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     pagination_class = PageLimitPagination
