@@ -16,72 +16,52 @@
 - Postgres 13.0
 - Dotenv 0.21.1
 
-Проект доступен по адресу: https://foodgram-andreyapa.sytes.net/.
+Проект доступен по адресу: http://foodgram-andreyapa.sytes.net/.
 
-Посмотреть список доступных адресов API : https://foodgram-andreyapa.sytes.net/api/.
+Посмотреть список доступных адресов API : http://foodgram-andreyapa.sytes.net/api/.
 
-Документация API доступна по адресу: https://foodgram-andreyapa.sytes.net/api/docs/.
+Документация API доступна по адресу: http://foodgram-andreyapa.sytes.net/api/docs/.
 
 ## Запуск проекта локально
-1. Склонируйте репозиторий:
+1. Склонируйте репозиторий и прейдите в корневую директорию foodgram-project-react:
 ```bash
 git clone git@github.com:Andrey-Apa/foodgram-project-react.git
+cd foodgram-project-react
 ```
-2. Cоздать и активировать виртуальное окружение:
--для Windows
+2. В директории infra создайте файл с .env с переменными окружения:
 ```bash
-python -m venv venv
-. venv/Scripts/activate
+cd infra
 ```
--для Linux, MacOs:
+# Содержание .env 
+- DB_ENGINE - движок базы данных # например django.db.backends.postgresql
+- DB_NAME - имя базы данных # postgres
+- POSTGRES_USER - логин для подключения к базе данных # postgres
+- POSTGRES_PASSWORD - пароль для подключения к БД (установите свой) # postgres
+- DB_HOST - название сервиса (контейнера) # db
+- DB_PORT - порт для подключения к БД # 5432
+- SECRET_KEY - секретный ключ
+- ALLOWED_HOSTS - разрешенные хосты # localhost
+
+3. Соберите контейнер и запустите:
 ```bash
-python3 -m venv venv
-source env/bin/activate
+docker-compose up --build
 ```
-3. Обновите pip и установите зависимости из файла requirements.txt:
--для Windows
+4. Внутри контейнера backend выполните миграции, загрузите данные, соберите статику:
+- выполнить миграции:
 ```bash
-python -m pip install --upgrade pip
-cd backend
-pip install -r requirements.txt
+sudo docker-compose exec backend python manage.py migrate
 ```
--для Linux, MacOs:
+- при необходимости загрузите базу данными:
 ```bash
-python3 -m pip install --upgrade pip
-cd backend
-pip install -r requirements.txt
+sudo docker-compose exec backend python manage.py loaddata dump.json
 ```
-4. Выполнить миграции:
-Выполнить миграции:
--для Windows:
+- соберите статику:
 ```bash
-python manage.py migrate
+sudo docker-compose exec backend python manage.py collectstatic --no-input
 ```
--для Linux, MacOs:
+5. Сооздайте суперюзера:
 ```bash
-python3 manage.py migrate
-```
-5. Загрузите базу данными ингридиентов:
--для Windows:
-```bash
-cd ../data
-python manage.py import_data
-```
--для Linux, MacOs:
-```bash
-cd ../data
-python3 manage.py import_data
-```
-6. Запустить проект:
--для Windows
-```bash
-cd ../backend
-python manage.py runserver
-```
--для Linux, MacOs:
-```bash
-cd ../backend
-python3 manage.py migrate
+sudo docker-compose exec backend python manage.py createsuperuser
 ```
 ## Запуск проекта в контейнере
 1. Со страницы репозитория https://github.com/Andrey-Apa/foodgram-project-react создать fork проекта в свой GitHUB;
