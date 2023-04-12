@@ -63,7 +63,7 @@ sudo docker-compose exec backend python manage.py collectstatic --no-input
 ```bash
 sudo docker-compose exec backend python manage.py createsuperuser
 ```
-## Запуск проекта в контейнере
+## Запуск проекта в автоматическом режиме
 1. Со страницы репозитория https://github.com/Andrey-Apa/foodgram-project-react создать fork проекта в свой GitHUB;
 
 2. В разделе репозитория проекта Setting/Secrets:
