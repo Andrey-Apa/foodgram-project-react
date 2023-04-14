@@ -249,9 +249,11 @@ class CreateRecipeSerializer(GetRecipeSerializer):
     def validate(self, data):
         """Проверка вводных данных при создании/редактировании рецепта.
         """
-        user = self.context.get('request').user
+        request = self.context.get('request')
+        user = request.user
         name = data.get('name')
-        if Recipe.objects.filter(author=user, name=name).exists():
+        if (request.method == 'POST'
+                and Recipe.objects.filter(author=user, name=name).exists()):
             raise ValidationError('Рецепт с таким именем уже существует!')
 
         ingredients = data['ingredients']
@@ -280,6 +282,9 @@ class CreateRecipeSerializer(GetRecipeSerializer):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         user = self.context.get('request').user
+        # name = validated_data.get('name')
+        # if Recipe.objects.filter(author=user, name=name).exists():
+        #     raise ValidationError('Рецепт с таким именем уже существует!')
         recipe = Recipe.objects.create(author=user, **validated_data)
         recipe.tags.set(tags)
         self.create_ingredients(ingredients, recipe)

@@ -13,7 +13,7 @@ def validate_username(value):
 
 
 def email_normalization(email):
-    """ Приводит почту к одному регистру."""
+    """ Приводит домен к одному регистру."""
     email = email or ''
     try:
         email_name, domain = email.strip().rsplit('@', 1)
