@@ -152,7 +152,6 @@ class RecipesViewSet(ModelViewSet):
                 'Вы не добавили ни обного рецепта в корзину.',
                 status=status.HTTP_400_BAD_REQUEST
             )
-
         filename = f'{user.username}_shopping_list.txt'
         shopping_list = [
             f'Список покупок пользователя:\n'

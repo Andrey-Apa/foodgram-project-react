@@ -3,6 +3,9 @@ from djoser.serializers import (PasswordSerializer, UserCreateSerializer,
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from django.contrib.auth import get_user_model
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from drf_extra_fields.fields import Base64ImageField
 
 from recipes.models import (Ingredient, IngredientRecipe, Favorite,
@@ -10,6 +13,9 @@ from recipes.models import (Ingredient, IngredientRecipe, Favorite,
 from users.models import Subscriptions
 
 User = get_user_model()
+
+MAX_AMOUNT = settings.MAX_AMOUNT
+MIN_AMOUNT = settings.MIN_AMOUNT
 
 
 class CustomUserSerializer(UserSerializer):
@@ -158,7 +164,17 @@ class AddIngredientToRecipeSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         queryset=Ingredient.objects.all()
     )
-    amount = serializers.IntegerField(write_only=True)
+    amount = serializers.IntegerField(
+        validators=(
+            MinValueValidator(
+                MIN_AMOUNT,
+                'Количество ингредиента не должно быть меньше 1.'),
+            MaxValueValidator(
+                MAX_AMOUNT,
+                ('Вы указали слишком большое количество ингредиента '
+                 '(максимальное значение 32767).'),),
+        ),
+        write_only=True)
 
     class Meta:
         model = IngredientRecipe
@@ -195,13 +211,11 @@ class GetRecipeSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
-        user = request.user
-        return Favorite.objects.filter(
-            favorite_recipe=obj,
-            user=user
-        ).exists()
+        if request.user:
+            return (((request is not None) and request.user.is_authenticated)
+                    and Favorite.objects.filter(
+                        favorite_recipe=obj,
+                        user=request.user).exists())
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
@@ -231,6 +245,25 @@ class CreateRecipeSerializer(GetRecipeSerializer):
             'text',
             'cooking_time',
         )
+
+    def validate(self, data):
+        """Проверка вводных данных при создании/редактировании рецепта.
+        """
+        user = self.context.get('request').user
+        name = data.get('name')
+        if Recipe.objects.filter(author=user, name=name).exists():
+            raise ValidationError('Рецепт с таким именем уже существует!')
+
+        ingredients = data['ingredients']
+        if not ingredients:
+            raise ValidationError('Необходим хотя бы один ингредиент!')
+        ing_list = []
+        for ingredient in ingredients:
+            ing_id = ingredient['id']
+            if ing_id in ing_list:
+                raise ValidationError('Выберите различне ингредиенты!')
+            ing_list.append(ing_id)
+        return data
 
     def create_ingredients(self, ingredients, recipe):
         """Функция добавления списка игредиентов в рецепт

@@ -4,9 +4,13 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models.functions import Length
 
 from core.models import CoreModel
 from core.validators import hex_color_validator
+
+
+models.CharField.register_lookup(Length)
 
 User = get_user_model()
 
@@ -27,6 +31,7 @@ class Tag(models.Model):
     color = models.CharField(
         'Цвет в HEX',
         max_length=7,
+        unique=True,
     )
     slug = models.SlugField(
         'Уникальный слаг',
@@ -61,6 +66,20 @@ class Ingredient(models.Model):
         ordering = ('name',)
         verbose_name = 'Ингридиент'
         verbose_name_plural = 'Ингридиенты'
+        constraints = (
+            models.UniqueConstraint(
+                fields=('name', 'measurement_unit'),
+                name='unique_for_ingredient'
+            ),
+            models.CheckConstraint(
+                check=models.Q(name__length__gt=0),
+                name='\n%(app_label)s_%(class)s_name is empty\n',
+            ),
+            models.CheckConstraint(
+                check=models.Q(measurement_unit__length__gt=0),
+                name='\n%(app_label)s_%(class)s_measurement_unit is empty\n',
+            ),
+        )
 
     def __str__(self) -> str:
         return (
@@ -188,7 +207,7 @@ class IngredientRecipe(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Ингридиент'
+        verbose_name = 'Ингредиент'
         verbose_name_plural = 'Количество ингридиентов'
         ordering = ('recipe',)
         constraints = (

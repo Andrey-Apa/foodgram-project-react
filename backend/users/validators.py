@@ -10,3 +10,15 @@ def validate_username(value):
         raise ValidationError(
             'Используйте буквы, цифры и символы @/./+/-/ при создании имени.'
         )
+
+
+def email_normalization(email):
+    """ Приводит почту к одному регистру."""
+    email = email or ''
+    try:
+        email_name, domain = email.strip().rsplit('@', 1)
+    except ValueError:
+        pass
+    else:
+        email = email_name.lower() + '@' + domain.lower()
+    return email

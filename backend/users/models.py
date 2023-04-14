@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 
 from django.db import models
 
-from .validators import validate_username
+from .validators import email_normalization, validate_username
 
 
 class User(AbstractUser):
@@ -49,6 +49,10 @@ class User(AbstractUser):
     def __str__(self) -> str:
         return f'{self.username}: {self.email}'
 
+    def clean(self):
+        self.email = email_normalization(self.email)
+        return super().clean()
+
 
 class Subscriptions(models.Model):
     """Модель подписок."""
@@ -79,4 +83,5 @@ class Subscriptions(models.Model):
         )
 
     def __str__(self):
-        return f'{self.user} подписан на {self.author}'
+        return (f'Пользователь: {self.user.username} '
+                f'подписан на -> {self.author.username}')
