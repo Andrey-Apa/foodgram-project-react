@@ -7,7 +7,7 @@ def get_user_time(request):
     """Получение времени пользователя из запроса.
     Определяем IP пользователя, далее временную зону, получаем время.
     """
-    user_ip = request.META.get('REMOTE_ADDR')
+    user_ip = request.META.get('HTTP_X-Real-IP')
     if user_ip is None:
         return dt.now(pytz.utc)
     try:
