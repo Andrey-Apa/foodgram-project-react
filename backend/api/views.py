@@ -1,4 +1,3 @@
-from datetime import datetime as dt
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
@@ -12,6 +11,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from recipes.models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
+
+from core.utilz import get_user_time
 
 from users.models import Subscriptions
 
@@ -156,7 +157,7 @@ class RecipesViewSet(ModelViewSet):
         shopping_list = [
             f'Список покупок пользователя:\n'
             f'{user.first_name} {user.last_name}\n'
-            f'Дата: {dt.now().strftime(DATE_TIME_FORMAT)}\n'
+            f'Дата: {get_user_time(self.request).strftime(DATE_TIME_FORMAT)}\n'
             f'____________________________']
 
         ingredients = Ingredient.objects.filter(
