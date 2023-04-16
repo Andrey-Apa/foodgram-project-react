@@ -10,8 +10,7 @@ def get_user_time(request):
     >> Получаем текущее время пользователя в его зоне.
     В случае неверной зоны или ее отсутсвия используется время по UTC.
     """
-    user_ip = (request.META.get('REMOTE_ADDR')
-               or request.META.get('HTTP_X_REAL_IP'))
+    user_ip = request.META.get('HTTP_X_REAL_IP')
     if user_ip is None:
         return dt.now(pytz.utc)
     try:
