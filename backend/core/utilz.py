@@ -20,5 +20,4 @@ def get_user_time(request):
         tzinfo = pytz.timezone(user_timezone)
         return dt.now(tz=tzinfo)
     except pytz.exceptions.UnknownTimeZoneError:
-        user_time = dt.now(pytz.utc)
-    return user_time
+        return dt.now(pytz.utc)
