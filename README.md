@@ -16,12 +16,6 @@
 - Postgres 13.0
 - Dotenv 0.21.1
 
-Проект доступен по адресу: http://foodgram-andreyapa.sytes.net/.
-
-Посмотреть список доступных адресов API : http://foodgram-andreyapa.sytes.net/api/.
-
-Документация API доступна по адресу: http://foodgram-andreyapa.sytes.net/api/docs/.
-
 ## Запуск проекта локально
 1. Склонируйте репозиторий и прейдите в корневую директорию foodgram-project-react:
 ```bash
